@@ -1,0 +1,38 @@
+{% extends "chenqi_app\index.html" %}
+{% load i18n %}
+{% block title %}{{ data.tool_name }}{% endblock %}
+{% block index_act %}{% endblock %}
+{% block tool_act %}id="home"{% endblock %}
+{% block content %}
+{{ block.super }}
+<div class="tool_index">
+    <div class="panel panel-default">
+        <!--div class="panel-heading">
+            <h3 class="panel-title">
+                {{ data.tool_name }}
+            </h3></div-->
+        <div class="panel-body">
+            <h3>{{ data.tool_name }}<hr></h3>
+            <h5>发布日期:&nbsp&nbsp{{ data.Time }}</h5>
+            <h5>开发人员:&nbsp&nbsp{{ data.content_people }}</h5>
+            <h3>工具介绍：<hr></h3>
+            <pre class="well">{{ data.content_text }}</pre>
+            <h3>工具下载地址：<hr></h3>
+            {% for key,value in data.download.items %}
+                <a href="{{ value }}">{{ key }}</a>
+            {% endfor %}
+            <h3>工具预览图：<hr></h3>
+            {% for s in data.content_png %}
+                <img src="{{ s }}" height=80% width=80%-->
+                <!--img src="/static/share/pic/1.png" height=40% width=40%-->
+            {% endfor %}
+        </div>
+        <div class="panel-footer">
+
+        </div>
+</div>
+</div>
+
+
+
+{% endblock %}

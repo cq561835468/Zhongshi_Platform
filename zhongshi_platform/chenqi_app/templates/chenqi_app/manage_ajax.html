@@ -1,0 +1,342 @@
+{% extends "chenqi_app\index.html" %}
+{% load i18n %}
+{% block title %}中试项目管理{% endblock %}
+{% block index_act %}{% endblock %}
+{% block tool_act %}{% endblock %}
+{% block manage_act %}id="home"{% endblock %}
+{% block content %}
+{{ block.super }}
+<div class="panel_pro_main">
+    <div class="search_pro_main">
+        <div class="search-pro-name">结果:<span id="search_num_get">{{ search_name }}</span>个项目</div>
+            <div class="search-head-search">
+                <button class="btn btn-primary" id="new_pro" data-toggle="modal" data-target="#NewPro">新建项目</button>
+                {% if Pro_list %} <form id="download_excel" action="{% url 'download_list' Pro_list %}" method="POST" enctype="multipart/form-data">{% endif %}
+                    {% csrf_token %}
+                    <button class="btn btn-success" id="Download">下载</button>
+                </form>
+                    <button class="btn-search" type="submit" id="search_go_all" onclick="go_to_page(1)">搜索</button>
+
+                    <input id="search_input" class="search-pro-input" type="text" placeholder="输入查询" name="search" hidden="hidden">
+                        <div id="state_hidden">
+                            <select id = "select_state" class="form-control" name="select_form">
+                                <option>全部</option>
+                                <option>未开始</option>
+                                <option>进行中</option>
+                                <option>暂停中</option>
+                                <option>已结项</option>
+                            </select>
+                        </div>
+
+                        <div id="time_hidden" hidden="hidden">
+                            <input class="form-control" id="end_time_manager" name="end_time_manager" type="date">
+                            <span id="time_span">结束时间</span>
+                            <input class="form-control" id="begin_time_manager" name="begin_time_manager" type="date">
+                            <span id="time_span2">起始时间</span>
+                        </div>
+                        <div id="ver_hidden" hidden="hidden">
+                            <input class="form-control" id="end_time_ver" name="end_time_ver" type="number">
+                            <span id="time_span_ver">至</span>
+                            <input class="form-control" id="begin_time_ver" name="begin_time_ver" type="number">
+                        </div>
+                    <select id = select_all class="form-control" name="select_form" onchange="change()">
+                        <option>状态</option>
+                        <option>项目名称</option>
+                        <option>负责人</option>
+                        <option>结项时间</option>
+                        <option>版本数</option>
+                    </select>
+            </div>
+    </div>
+</div>
+
+<div class="pro">
+    <table id="tableSort" class="pro_main">
+        <thead>
+        <tr>
+            <!--<th class="pro_la" rowspan="2">项目组</th>-->
+            <th class="pro_sm" rowspan="2" >序号</th>
+            <th class="pro_la" rowspan="2">状态</th>
+            <!--<th class="pro_sm" rowspan="2">项目类型</th>-->
+            <th class="pro_name" rowspan="2">项目名称<!--span class="arrow dsc"></span--></th>
+            <th class="pro_bug">致命</th>
+            <th class="pro_bug">严重</th>
+            <th class="pro_bug">普通</th>
+            <th class="pro_bug">较低</th>
+            <th class="pro_bug">建议</th>
+            <th class="pro_bug">总计</th>
+            <th class="pro_la" rowspan="2">负责人</th>
+            <!--<th class="pro_la" rowspan="2">项目参与人</th>-->
+            <th class="pro_time" rowspan="2">创建时间<!--span class="arrow dsc"></span--></th>
+            <th class="pro_time" rowspan="2">结项时间<!--span class="arrow dsc"></span--></th>
+            <th class="pro_sm" rowspan="2">工时总计</th>
+            <th class="pro_sm" rowspan="2">版本数<!--span class="arrow dsc"></span--></th>
+        </tr>
+        </thead>
+        <tbody id="body">
+        {% for i in data %}
+        <tr>
+            <td class="separator" >{{ i.14 }}</td>
+            {% if i.1 == '已结项'%}
+            <td id="bug_table_green">{{ i.1 }}</td>
+            {% elif i.1 == '未开始' %}
+            <td id="bug_table_blue">{{ i.1 }}</td>
+            {% elif i.1 == '进行中' %}
+            <td id="bug_table_yellow">{{ i.1 }}</td>
+            {% elif i.1 == '暂停中' %}
+            <td id="bug_table_red">{{ i.1 }}</td>
+            {% endif %}
+            <td class="bug_table" ><a class="name_link" href="{% url 'manage_info' i.0 %}" target="_blank">{{ i.2 }}</a></td>
+            <td class="bug_table">{{ i.3 }}</td>
+            <td class="bug_table">{{ i.4 }}</td>
+            <td class="bug_table">{{ i.5 }}</td>
+            <td class="bug_table">{{ i.6 }}</td>
+            <td class="bug_table">{{ i.7 }}</td>
+            <td class="bug_table">{{ i.8 }}</td>
+            <td class="people_table">{{ i.9 }}</td>
+            <td class="time_table">{{ i.10|date:"Y-m-d" }}</td>
+            {% if i.11 == '--'%}
+            <td class="time_table">{{ i.11}}</td>
+            {% else %}
+            <td class="time_table">{{ i.11|date:"Y-m-d" }}</td>
+            {% endif %}
+            <td class="time_table">{{ i.12 }}</td>
+            <td class="time_table">{{ i.13 }}</td>
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+    <div class="page_botton">
+        <ul class="pagination" id="pagination">
+            {% if page_list|length > 5 %}
+            <li><a href="#" class="page_go" id="search_go_beg" onclick="go_to_page(1)">&laquo;</a></li>
+            <li><a href="#" class="page_go_cur" id="page_go_cur" onclick="go_to_page(1)">1</a></li>
+            <li><a href="#" class="page_go_cur" onclick="go_to_page(2)">2</a></li>
+            <li><a href="#" class="page_go_cur" onclick="go_to_page(3)">3</a></li>
+            <li><a href="#" class="page_go_cur" onclick="go_to_page(4)">4</a></li>
+            <li><a href="#" class="page_go_cur" onclick="go_to_page(5)">5</a></li>
+            <li><a href="#" class="page_go" id="search_go_end" onclick="go_to_page({{ page_list|length }})">&raquo;</a></li>
+            {% else %}
+            <li><a href="#" class="page_go" id="search_go_beg" onclick="go_to_page(1)">&laquo;</a></li>
+            {% for i in page_list %}
+            {% if i == 1 %}
+            <li><a href="#" class="page_go_cur" id="page_go_cur">1</a></li>
+            {% else %}
+            <li><a href="#" class="page_go_cur" onclick="go_to_page({{ i }})">{{ i }}</a></li>
+            {% endif %}
+            {% endfor %}
+            <li><a href="#" class="page_go" id="search_go_end" onclick="go_to_page({{ page_list|length }})">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+<div class="modal fade" id="NewPro" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="width:780px;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="myModalLabel">新建项目</h4>
+                            </div>
+
+                            <form action="{% url 'projectnew' %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="stata_value" value="begin">
+                                <input type="hidden" name="pro_num" value="{{ data_pro.Pro_numbers }}" />
+                                <div class="modal-body"><table><tr>
+                                    {% for field in new_pro %}
+                                    {% if forloop.counter|divisibleby:2 %}
+                                        <td>{{ field.label_tag }}{{ field }}</td>
+                                    {% else %}
+                                        <td>{{ field.label_tag }}{{ field }}</td>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {{ forms.date }}</tr></table></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">提交</button>
+                                </div>
+                            </form>
+                        </div><!-- /.modal-content --></div><!-- /.modal --></div><!-- /modal fade -->
+<script type="text/javascript">
+/**
+     * 通过表头对表列进行排序
+     *
+     * @param sTableID
+     *            要处理的表ID<table id=''>
+     * @param iCol
+     *            字段列id eg: 0 1 2 3 ...
+     * @param sDataType
+     *            该字段数据类型 int,float,date 缺省情况下当字符串处理
+     */
+    function  orderByName(sTableID, iCol, sDataType) {
+         var  oTable = document.getElementById(sTableID);
+         var  oTBody = oTable.tBodies[0];
+         var  colDataRows = oTBody.rows;
+         var  aTRs =  new  Array;
+         for  (  var  i = 0; i < colDataRows.length; i++) {
+            aTRs[i] = colDataRows[i];
+        }
+         if  (oTable.sortCol == iCol) {
+            aTRs.reverse();
+        }  else  {
+            aTRs.sort(generateCompareTRs(iCol, sDataType));
+        }
+         var  oFragment = document.createDocumentFragment();
+         for  (  var  j = 0; j < aTRs.length; j++) {
+            oFragment.appendChild(aTRs[j]);
+        }
+        oTBody.appendChild(oFragment);
+        oTable.sortCol = iCol;
+    }
+
+
+    /**
+     * 处理排序的字段类型
+     *
+     * @param sValue
+     *            字段值 默认为字符类型即比较ASCII码
+     * @param sDataType
+     *            字段类型 对于date只支持格式为mm/dd/yyyy或mmmm dd,yyyy(January 12,2004)
+     * @return
+     */
+    function  convert(sValue, sDataType) {
+         switch  (sDataType) {
+         case   "int" :
+             return  parseInt(sValue);
+         case   "float" :
+             return  parseFloat(sValue);
+         case   "date" :
+             return   new  Date(Date.parse(sValue));
+         default :
+             return  sValue.toString();
+        }
+    }
+
+
+    /**
+     * 比较函数生成器
+     *
+     * @param iCol
+     *            数据行数
+     * @param sDataType
+     *            该行的数据类型
+     * @return
+     */
+    function  generateCompareTRs(iCol, sDataType) {
+         return   function  compareTRs(oTR1, oTR2) {
+            vValue1 = convert(oTR1.cells[iCol].firstChild.nodeValue, sDataType);
+            vValue2 = convert(oTR2.cells[iCol].firstChild.nodeValue, sDataType);
+             if  (vValue1 < vValue2) {
+                 return  -1;
+            }  else   if  (vValue1 > vValue2) {
+                 return  1;
+            }  else  {
+                 return  0;
+            }
+        };
+    }
+    </script>
+<script>
+     function change() {
+        <!--var th = document.getElementById("time_hidden");-->
+        var obj = document.getElementById("select_all"); //定位id
+        var index = obj.selectedIndex; // 选中索引
+        if(index == 0){
+            $("#state_hidden").removeAttr('hidden');
+            $("#search_input").attr('hidden','hidden');
+            $("#time_hidden").attr('hidden','hidden');
+            $("#ver_hidden").attr('hidden','hidden');
+        }
+        if(index == 1 || index == 2){
+            $("#search_input").removeAttr('hidden');
+            $("#state_hidden").attr('hidden','hidden');
+            $("#time_hidden").attr('hidden','hidden');
+            $("#ver_hidden").attr('hidden','hidden');
+        }
+        if (index == 3){
+            $("#time_hidden").removeAttr('hidden');
+            $("#search_input").attr('hidden','hidden');
+            $("#state_hidden").attr('hidden','hidden');
+            $("#ver_hidden").attr('hidden','hidden');
+        }
+        if (index == 4){
+            $("#ver_hidden").removeAttr('hidden');
+            $("#time_hidden").attr('hidden','hidden');
+            $("#search_input").attr('hidden','hidden');
+            $("#state_hidden").attr('hidden','hidden');
+        }
+       };
+</script>
+<script>
+function go_to_page(arrw){
+            $.ajaxSetup({
+            data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+        });
+        $.ajax({
+                url: '/project_main/',
+                type: 'POST',
+                data: {
+                           select: $('#select_all').val(),
+                           pro_state: $("#select_state").val(),
+                           pro_name:$("#search_input").val(),
+                           begin_time_manager:$("#begin_time_manager").val(),
+                           end_time_manager:$("#end_time_manager").val(),
+                           begin_time_ver:$("#begin_time_ver").val(),
+                           end_time_ver:$("#end_time_ver").val(),
+                           page_go:arrw,
+                           },
+                           success: function (result){
+                                var datas = $.parseJSON(result); //列表
+                                var str = "";
+                                $.each(datas.data, function(ii,iitem){
+                                    str += "<tr>";
+                                    str += "<td>"+iitem[14]+"</td>"
+                                    if(iitem[1] == '已结项'){
+                                    str += "<td id=\"bug_table_green\">"+iitem[1]+"</td>"}
+                                    else if(iitem[1] == '进行中'){
+                                    str += "<td id=\"bug_table_yellow\">"+iitem[1]+"</td>"}
+                                    else if(iitem[1] == '暂停中'){
+                                    str += "<td id=\"bug_table_red\">"+iitem[1]+"</td>"}
+                                    else{
+                                    str += "<td id=\"bug_table_blue\">"+iitem[1]+"</td>"}
+                                    //str += "<td href=\"/project/\">"+iitem[2]+"</td>"
+                                    str += "<td><a href=\"/project/"+iitem[0]+"\" target=\"_blank\">"+iitem[2]+"</a></td>"
+                                    str += "<td>"+iitem[3]+"</td>"
+                                    str += "<td>"+iitem[4]+"</td>"
+                                    str += "<td>"+iitem[5]+"</td>"
+                                    str += "<td>"+iitem[6]+"</td>"
+                                    str += "<td>"+iitem[7]+"</td>"
+                                    str += "<td>"+iitem[8]+"</td>"
+                                    str += "<td>"+iitem[9]+"</td>"
+                                    str += "<td>"+iitem[10]+"</td>"
+                                    str += "<td>"+iitem[11]+"</td>"
+                                    str += "<td>"+iitem[12]+"</td>"
+                                    str += "<td>"+iitem[13]+"</td>"
+                                    str +="</tr>"
+                                });
+                                //刷新表格內容
+                                $('#body').empty()
+                                $('#tableSort').append(str)
+                                //刷新分頁菜單
+                                var page_s = "";
+                                page_s += "<li><a href=\"#\" class=\"page_go\" onclick=\"go_to_page(1)\">&laquo;</a></li>"
+                                $.each(datas.page_list, function(ii,iitem){
+                                    if(iitem == arrw){
+                                        page_s += "<li><a href=\"#\" class=\"page_go\" id=\"page_go_cur\" onclick=\"go_to_page("+iitem+")\">"+iitem+"</a></li>"
+                                    }
+                                    else{
+                                        page_s += "<li><a href=\"#\" class=\"page_go\" onclick=\"go_to_page("+iitem+")\">"+iitem+"</a></li>"
+                                    }
+                                });
+                                page_s += "<li><a href=\"#\" class=\"page_go\" onclick=\"go_to_page("+datas.page_list.length+")\">&raquo;</a></li>"
+                                $('#pagination').empty()
+                                $('#pagination').append(page_s)
+                                $('#search_num_get').text(datas.search_name);
+                                $('#download_excel').attr('action','/project/download/'+datas.Pro_list)
+                           }
+                           })
+
+}
+</script>
+{% endblock %}

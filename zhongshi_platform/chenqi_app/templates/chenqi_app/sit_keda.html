@@ -1,0 +1,48 @@
+{% extends "chenqi_app\index.html" %}
+{% load i18n %}
+
+{% block title %}中试项目管理{% endblock %}
+
+{% block index_act %}{% endblock %}
+{% block tool_act %}{% endblock %}
+{% block sit %}id="home"{% endblock %}
+{% block content %}
+{{ block.super }}
+
+
+
+{% for i,value in data.items %}
+    {% for i_se,value_se in value.items %}
+        <div class="title_cen"><h1>{{ i }}</h2></div>
+            <div class="main_site">
+                <div id={{ i }} style="cent"></div>
+            <button id="export-file_{{ i }}">导出</button>
+        </div>
+<script>
+var data = {{ i_se|safe }};
+var container = document.getElementById("{{ i }}");
+var hot = new Handsontable(container, {
+  data: data,
+  rowHeaders: true,
+  colHeaders: true,
+  contextMenu: true,
+  manualColumnResize: true,
+  mergeCells:{{ value_se|safe }}
+});
+   var buttons = {
+    file: document.getElementById('export-file')
+  };
+
+  var exportPlugin = hot.getPlugin('exportFile');
+  var resultTextarea = document.getElementById('result');
+
+
+  buttons.file.addEventListener('click', function() {
+    exportPlugin.downloadFile('csv', {filename: 'MyFile'});
+  });
+</script>
+    {% endfor %}
+{% endfor %}
+
+
+{% endblock %}

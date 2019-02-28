@@ -1,0 +1,57 @@
+{% extends "chenqi_app\index.html" %}
+{% load i18n %}
+{% block title %}工具{% endblock %}
+{% block index_act %}{% endblock %}
+{% block tool_act %}class="active"{% endblock %}
+{% block content %}
+{{ block.super }}
+<div class="search_head">
+	<div class="search_form">
+        <form action="/tool/" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+		    <input class="search_input" type="text" placeholder="输入需要查询的工具" name="search">
+		    <button class="btn btn-default" type="submit">搜索</button>
+        </form>
+	</div>
+</div>
+<div class="clear"></div>
+<div class="tool_index">
+	<div class="search">
+	<span class="search_name">{{ search_name }}<<</span>
+</div>
+    <div class="grid">
+        {% for i in data %}
+		<div class="grid-item">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">
+						<a class="tool_title" href="tool_main/{{ i.ID }}/" target="view_window">{{ i.tool_name }}</a>
+					</h3></div>
+				<div class="panel-body">
+					<p title="{{ i.content_text }}" data-toggle="tooltip" data-placement="top" class="line-limit-length">{{ i.content_text }}</p>
+        			<img src="{{ i.content_ico }}" height=100% width=100%>
+					<div class="panel-footer">
+                        <a href="{{ i.download }}">下载</a>
+						<span class="dev_name">开发:{{ i.content_people }}</span></div></div>
+					</div>
+        </div>
+        {% endfor %}
+</div>
+</div>
+
+<script>
+var elem = document.querySelector('.grid');
+var msnry = new Masonry( elem, {
+　//属性设置
+  itemSelector: '.grid-item',
+  columnWidth: 200
+});
+var msnry = new Masonry( '.grid', {
+  //属性设置
+});
+</script>
+<script>
+   $(function () { $("[data-toggle='tooltip']").tooltip(); });
+</script>
+{% endblock %}
+

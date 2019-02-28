@@ -1,0 +1,452 @@
+{% extends "chenqi_app\index.html" %}
+{% load i18n %}
+
+{% block title %}详情页{% endblock %}
+
+{% block index_act %}{% endblock %}
+{% block tool_act %}{% endblock %}
+{% block manage_act %}class="active"{% endblock %}
+{% block content %}
+{{ block.super }}
+<div class="page_navigation">
+<ul id="navig" class="list-group">
+    <li id="navig1" class="list-group-item"><a href="#P_Time">项目工时</a></li>
+    <li id="navig2" class="list-group-item"><a href="#P_People">人员</a></li>
+    <li id="navig3" class="list-group-item"><a href="#P_Bug">中试缺陷提交情况</a></li>
+    <li id="navig4" class="list-group-item"><a href="#P_N_P">未解决的主要问题</a></li>
+    <li id="navig5" class="list-group-item"><a href="#P_L_P">遗留的主要问题</a></li>
+    <li id="navig6" class="list-group-item"><a href="#P_F_P">需要产线跟踪的问题</a></li>
+    <li id="navig7" class="list-group-item"><a href="#P_O_P">中试结论与建议</a></li>
+    <li id="navig8" class="list-group-item"><a href="#Pro_Name">返回顶部</a></li>
+</ul>
+</div>
+<div class="tool_index">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div>
+                <h1 id="Pro_Name" class="pro-new">{{ data_pro.Pro_name }}</h1>&nbsp&nbsp&nbsp
+                <h3 id="Pro_Sort" class="pro-new">{{ data_pro.Pro_Sort }}</h3>
+                {% if request.user.is_authenticated %}
+                <div class="button-div">
+                        <button class="btn btn-success" value="start" name="pro-but" data-toggle="modal" data-target="#begin" {% if state == 1 or state == 3 %} disabled="disabled" {% endif %}>{% if state == 0 or state == 1 or state == 3 %}开始{% elif state == 2 %}重新开始{% endif %}</button>
+                        <button class="btn btn-success" value="stop" name="pro-but" data-toggle="modal" data-target="#stop"{% if state == 0 or state == 2 or state == 3 %} disabled="disabled" {% endif %} >暂停</button>
+                        <button class="btn btn-success" value="end" name="pro-but" data-toggle="modal" data-target="#end"{% if state == 0 or state == 1 or state == 3 %} disabled="disabled" {% endif %}>结束</button>
+                        <button class="btn btn-success" value="syn" name="pro-but" disabled="disabled" >工时同步</button>
+                        <div class="modal fade" id="begin" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="width:780px;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="myModalLabel">开始项目</h4>
+                            </div>
+
+                            <form action="/project/{{ data_pro.Pro_numbers }}/" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="stata_value" value="begin">
+                                <input type="hidden" name="pro_num" value="{{ data_pro.Pro_numbers }}" />
+                                <div class="modal-body"><table><tr>
+                                    {% for field in forms_begin %}
+                                    {% if forloop.counter|divisibleby:2 %}
+                                        <td>{{ field.label_tag }}{{ field }}</td>
+                                    {% else %}
+                                        <td>{{ field.label_tag }}{{ field }}</td>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {{ forms.date }}</tr></table></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">提交</button>
+                                </div>
+                            </form>
+                        </div><!-- /.modal-content --></div><!-- /.modal --></div><!-- /modal fade -->
+
+                        <div class="modal fade" id="stop" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="width:480px;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="myModalLabel">暂停项目</h4>
+                            </div>
+                            <form action="/project/{{ data_pro.Pro_numbers }}/" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="stata_value" value="stop">
+                                <input type="hidden" name="pro_num" value="{{ data_pro.Pro_numbers }}" />
+                                <div class="modal-body"><table><tr>
+                                    {% for field in forms_stop %}
+                                    {% if forloop.counter|divisibleby:2 %}
+                                        <td>{{ field.label_tag }}{{ field }}</td>
+                                    {% else %}
+                                        <td>{{ field.label_tag }}{{ field }}</td>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {{ forms.date }}</tr></table></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">提交</button>
+                                </div>
+                            </form>
+                        </div><!-- /.modal-content --></div><!-- /.modal --></div><!-- /modal fade -->
+
+                        <div class="modal fade" id="end" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" style="width:480px;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="myModalLabel">暂停项目</h4>
+                            </div>
+                            <form action="/project/{{ data_pro.Pro_numbers }}/" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="stata_value" value="end">
+                                <input type="hidden" name="pro_num" value="{{ data_pro.Pro_numbers }}" />
+                                <div class="modal-body"><table><tr>
+                                    {% for field in forms_end %}
+                                    {% if forloop.counter|divisibleby:2 %}
+                                        <td>{{ field.label_tag }}{{ field }}</td>
+                                    {% else %}
+                                        <td>{{ field.label_tag }}{{ field }}</td>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {{ forms.date }}</tr></table></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                    <button type="submit" class="btn btn-primary">提交</button>
+                                </div>
+                            </form>
+                        </div><!-- /.modal-content --></div><!-- /.modal --></div><!-- /modal fade -->
+            </div>
+                {% endif %}
+            <br><br>
+                <div class="list-group">
+                <div><span {% if state == 3 %}class="list-group-item list-group-item-success" {% else %} class="list-group-item list-group-item-warning" {% endif %}style="">项目状态:{{ data_pro.Pro_state }}</span></div>
+                <div><span {% if data_pro.Pro_ps == '通过' %}class="list-group-item list-group-item-success" {% else %} class="list-group-item list-group-item-danger" {% endif %}style="">中试结论:{{ data_pro.Pro_ps }}</span></div>
+                    <div><span {% if data_pro.Pro_DI > 20 %}class="list-group-item list-group-item-danger" {% else %} class="list-group-item list-group-item-success" {% endif %}style="">DI值为:{{ data_pro.Pro_DI }}</span></div>
+                    <div><span id="pro_time_head" class="list-group-item list-group-item-success" style="">项目时间:{{ data_pro.Pro_Update_Time }} 至 {{ data_pro.Pro_Over_Time }}</span></div>
+                </div>
+
+            <!--<hr style=" height:2px;border-top:2px solid #185598;"/>-->
+            <h2 id="P_Time">项目工时<hr></h2>
+            <table class="main_pro_time" >
+                <tr>
+                    <th>测试活动</th>
+                    <th>版本号</th>
+                    <th>开始时间</th>
+                    <th>结束时间</th>
+                    <th>实际耗时</th>
+                    <th>总耗时</th>
+                </tr>
+                {% for time_loop in data %}
+                    {% if forloop.first %}
+                        <tr>
+                            <td>{{ time_loop.Time_active }}</td>
+                            <td>{{ time_loop.Time_version_num }}</td>
+                            <td>{{ time_loop.Time_begin }}</td>
+                            <td>{{ time_loop.Time_end }}</td>
+                            <td>{{ time_loop.Time_use }}</td>
+                            <td class="time_all" rowspan="{{ time_len }}">共:{{ time_all }}</td>
+                        </tr>
+                    {% else %}
+                    <tr>
+                        <td>{{ time_loop.Time_active }}</td>
+                        <td>{{ time_loop.Time_version_num }}</td>
+                        <td>{{ time_loop.Time_begin }}</td>
+                        <td>{{ time_loop.Time_end }}</td>
+                        <td>{{ time_loop.Time_use }}</td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+            <h2 id="P_People">人员<hr></h2>
+            <h4 class="name_list">产线项目人员:</h3>
+                <!----产线人员提交修改----->
+
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <button id="people_line_edit" class="edit" onclick="post_context(people_line_edit,people_line_text,people_line_save)"></button>
+                {% endif %}
+                <form action="{% url 'context' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input hidden="hidden" value="people_line" name="sort_name">
+                    <button id="people_line_save" class="save" hidden="hidden" type="submit"></button>
+                    <textarea class="well" id="people_line_text" name="textarea" readonly>{{ data_pro.Pro_lines }}</textarea>
+                </form>
+
+
+                <!----中试项目负责人提交修改----->
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <button id="edit_zs_main" class="edit"></button>
+                {% endif %}
+                <form action="{% url 'context' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h4 class="name_list">当前中试项目负责人: <input id="input_zs_main" class="pro_main_name" value="{{ data_pro.Pro_People_pr }}"
+                                         type="text" disabled="disabled" name="textarea" onkeyup="value=value.replace(/[^\w\u4E00-\u9FA5]/g, '')">
+                    <input hidden="hidden" value="people_zs_main" name="sort_name" >
+                    <button class="save" id="save_zs_main" hidden="hidden" type="submit"></button></h4>
+                </form>
+                <h4 class="add_master">曾经的项目负责人: {{ data_pro.Pro_People_pr_old }}</h4>
+                <br>
+                <!--中试项目项目参与人提交修改-->
+                <h4 class="name_list">中试项目人员:</h4>
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <button id="edit_zs" class="edit" onclick="post_context(edit_zs,people_zs,save_zs)"></button>
+                {% endif %}
+                <form action="{% url 'context' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input id="people_master_name" hidden="hidden" value="people_zs" name="sort_name" >
+                    <button id="save_zs" class="save" hidden="hidden" type="submit"></button>
+                    <textarea class="well" id="people_zs" name="textarea" readonly>{{ data_pro.Pro_zs }}</textarea>
+                </form>
+            <br>
+            <h2 id="P_Bug">中试缺陷提交情况<hr></h2>
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <form action="{% url 'bug_up' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                <div class="bug_up"><input type="file" name="file_bug"><button type="submit">上传</button></div>
+                </form>
+                {% endif %}
+            <div id="container"></div>
+            <hr>
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <form action="{% url 'bug_up_pie' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                <div class="bug_up"><input type="file" name="file_bug_pic"><button type="submit">上传</button></div>
+                </form>
+                {% endif %}
+            <div id="container2"></div>
+                <div></div>
+                <br><br><br>
+                <!--未解决的主要问题提交修改-->
+                <hr>
+            <h4 class="name_list" id="P_N_P">未解决的主要问题:</h4>
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <button id="Need_P_edit" class="edit" onclick="post_context(Need_P_edit,Need_P_text,Need_P_save)"></button>
+                {% endif %}
+                <form action="{% url 'context' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input hidden="hidden" value="PNB" name="sort_name">
+                    <button id="Need_P_save" class="save" hidden="hidden" type="submit"></button>
+                    <textarea class="well" id="Need_P_text" name="textarea" readonly>{{ data_pro.Pro_nedre_bug }}</textarea>
+                </form>
+                <!--遗留的主要问题提交修改-->
+            <h4 class="name_list" id="P_L_P">遗留的主要问题:<hr></h4>
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <button id="P_l_edit" class="edit" onclick="post_context(P_l_edit,P_l_text,P_l_save)"></button>
+                {% endif %}
+                <form action="{% url 'context' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input hidden="hidden" value="PLB" name="sort_name">
+                    <button id="P_l_save" class="save" hidden="hidden" type="submit"></button>
+                    <textarea class="well" id="P_l_text" name="textarea" readonly>{{ data_pro.Pro_leave_bug }}</textarea>
+                </form>
+                <!--遗留的主要问题提交修改-->
+                <hr>
+                <h4 class="name_list" id="P_F_P">需要产线跟踪的问题:</h4>
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <button id="P_F_edit" class="edit" onclick="post_context(P_F_edit,P_F_text,P_F_save)"></button>
+                {% endif %}
+                <form action="{% url 'context' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input hidden="hidden" value="PFB" name="sort_name">
+                    <button id="P_F_save" class="save" hidden="hidden" type="submit"></button>
+                    <textarea class="well" id="P_F_text" name="textarea" readonly>{{ data_pro.Pro_nedfol_bug }}</textarea>
+                </form>
+            <h2 id="P_O_P">中试结论与建议<hr></h2>
+                <!--遗留的主要问题提交修改-->
+                <h4 class="name_list">测试结论:</h4>
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <button id="P_Z_edit" class="edit" onclick="post_context(P_Z_edit,P_Z_text,P_Z_save)"></button>
+                {% endif %}
+                <form action="{% url 'context' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input hidden="hidden" value="PZE" name="sort_name">
+                    <button id="P_Z_save" class="save" hidden="hidden" type="submit"></button>
+                    <textarea class="well" id="P_Z_text" name="textarea" readonly>{{ data_pro.Pro_zs_end }}</textarea>
+                </form>
+                <!--安全结论提交修改-->
+                <h4 class="name_list">安全结论:</h4>
+                {% if request.user.username == data_pro.Pro_People_pr %}
+                <button id="P_S_edit" class="edit" onclick="post_context(P_S_edit,P_S_text,P_S_save)"></button>
+                {% endif %}
+                <form action="{% url 'context' data_pro.Pro_numbers %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input hidden="hidden" value="PSE" name="sort_name">
+                    <button id="P_S_save" class="save" hidden="hidden" type="submit"></button>
+                    <textarea class="well" id="P_S_text" name="textarea" readonly>{{ data_pro.Pro_safe_end }}</textarea>
+                </form>
+        </div>
+</div>
+</div>
+</div>
+<span id="activeitem" style="color:red;"></span>
+<script type="text/javascript">
+var dom = document.getElementById("container");
+var myChart = echarts.init(dom);
+var app = {};
+option = {
+    title: {
+        text: '{{ data_pro.Pro_name }}中试BUG提交情况',
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'axis',
+        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+        }
+    },
+    legend: {
+        left:'left',
+        data:['关闭','未关闭']
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis : [
+        {
+            type : 'category',
+            data : {{ list_name|safe }}
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value'
+        }
+    ],
+    series : [
+        {
+            name:'关闭',
+            type:'bar',
+            stack: 'test',
+            barWidth : 40,
+            data:{{ list_open }}
+        },
+        {
+            name:'未关闭',
+            type:'bar',
+            stack: 'test',
+            barWidth : 40,
+            data:{{ list_close }}
+        },
+    ],
+    color:['#4682B4','#B80000'],
+    label:{
+        show:true,
+    }
+};
+;
+if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+}
+       </script>
+<script type="text/javascript">
+var dom = document.getElementById("container2");
+var myChart = echarts.init(dom);
+var app = {};
+option = {
+    title : {
+        text: '{{ data_pro.Pro_name }}中试提交缺陷分布情况',
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{b} : {c} ({d}%)"
+    },
+    legend: {
+        orient: 'vertical',
+        left: 'left',
+        data: {{ pic_data1|safe }}
+    },
+    series : [
+        {
+            type: 'pie',
+            radius : '70%',
+            center: ['50%', '50%'],
+             label: {
+                normal: {
+                    formatter: "{b}: {c}个"
+                }
+            },
+            data:{{ pic_data2|safe }},
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ],
+};
+;
+if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+}
+</script>
+<script type="text/javascript">
+window.onbeforeunload = function () {
+    var scrollPos;
+    if (typeof window.pageYOffset != 'undefined') {
+        scrollPos = window.pageYOffset;
+        alert(scrollPos);
+    }
+    else if (typeof document.compatMode != 'undefined' && document.compatMode != 'BackCompat') {
+        scrollPos = document.documentElement.scrollTop;
+        alert(scrollPos);
+    }
+    else if (typeof document.body != 'undefined') {
+        scrollPos = document.body.scrollTop;
+        alert(scrollPos);
+    }
+    document.cookie = "scrollTop=" + scrollPos; //存储滚动条位置到cookies中
+}
+
+window.onload = function () {
+    if (document.cookie.match(/scrollTop=([^;]+)(;|$)/) != null) {
+        var arr = document.cookie.match(/scrollTop=([^;]+)(;|$)/); //cookies中不为空，则读取滚动条位置
+        document.documentElement.scrollTop = parseInt(arr[1]);
+        document.body.scrollTop = parseInt(arr[1]);
+    }
+}
+
+</script>
+<script type="text/javascript">
+$(document).ready(function() {
+  $("a").click(function() {
+    $("html, body").animate({
+      scrollTop: $($(this).attr("href")).offset().top + "px"
+    }, {
+      duration: 500,
+      easing: "swing"
+    });
+    return false;
+  });
+});
+    </script>
+<script type="text/javascript">
+$("#edit_zs_main").click(function() {
+    $("#edit_zs_main").attr('hidden','hidden');
+    $("#input_zs_main").removeAttr('disabled');
+    $("#input_zs_main").css('border','0.5px solid #378888');
+    $("#save_zs_main").removeAttr('hidden');
+})
+</script>
+<script type="text/javascript">
+function post_context(edit,text,save) {
+    $(edit).attr('hidden','hidden');
+    $(text).removeAttr('readonly');
+    $(text).css('background-image','linear-gradient(to bottom, #fff 0%, #fff 100%)');
+    $(save).removeAttr('hidden');
+}
+</script>
+<!--<script>-->
+<!--$('input').bind('keypress', function (event) {-->
+ <!--//alert("123123");-->
+ <!--var regex = new RegExp("^[a-zA-Z0-9]+$");-->
+ <!--var key = String.fromCharCode(!event.charCode? event.which : event.charCode);-->
+ <!--if (!regex.test(key)) {-->
+ <!--event.preventDefault();-->
+ <!--return false;-->
+ <!--}-->
+<!--});-->
+<!--</script>-->
+{% endblock %}

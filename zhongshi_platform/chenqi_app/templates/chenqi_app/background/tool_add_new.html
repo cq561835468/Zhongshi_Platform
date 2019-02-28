@@ -1,0 +1,17 @@
+{% extends "chenqi_app\index.html" %}
+{% load i18n %}
+{% block title %}工具添加{% endblock %}
+{% block index_act %}{% endblock %}
+{% block tool_act %}class="active"{% endblock %}
+{% block content %}
+{{ block.super }}
+<form action="/background/tool_add/" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form_div">
+        {{ field.label }} : {{ field }}
+    </div>
+    {% endfor %}
+    <input type="submit" value="Submit" />
+</form>
+{% endblock %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--Bootstrap-->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-theme.css" rel="stylesheet">
+	<link href="/static/css/style.css" rel="stylesheet">
+	<link href="/static/css/handsontable.full.min.css" rel="stylesheet">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/vue.js"></script>
+	<script src="/static/js/masonry.pkgd.min.js"></script>
+	<script src="/static/js/handsontable.full.min.js"></script>
+	<script src="/static/js/echarts.min.js"></script>
+	<!--<script src="/static/js/pro_main.js"></script>-->
+    <title>{% block title %}中试管理平台{% endblock %}</title>
+</head>
+<body>
+{% block content %}
+<nav class="navbar navbar-inverse">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="{% url 'zhongshi' %}">中试管理平台</a>
+		</div>
+		<div>
+		<ul class="nav navbar-nav">
+			<!--li {% block index_actx %}class="active"{% endblock %}><a href="{% url 'index' %}">首页</a></li>
+			<li {% block x %}{% endblock %}><a href="{% url 'tool' %}">工具</a></li>
+            <li {% block manage_actx %}{% endblock %}><a href="{% url 'manage' %}">中试项目管理平台</a></li>
+			<li {% block sitx %}{% endblock %}><a href="{% url 'sit' %}">上海科达座位分布</a></li-->
+			{% if request.user.is_authenticated %}
+			<li><a href="#">当前用户:{{ request.user.username }}</a></li>
+			<li><a href="/admin/logout/">登出</a></li>
+			{% endif %}
+			<!--<button onclick="BroswerUtil()">test</button>-->
+		</ul>
+		</div>
+	</div>
+</nav>
+		<ul class="main-tool" >
+			<li><a {% block index_act %}id="home"{% endblock %} href="{% url 'index' %}">首页</a></li>
+			<li><a {% block tool_act %}{% endblock %}a href="{% url 'tool' %}">工具</a></li>
+			<li><a {% block manage_act %}{% endblock %} href="{% url 'manage' %}">中试项目管理</a></li>
+			<li><a {% block sit %}{% endblock %} href="{% url 'sit' %}">上海工位分布</a></li>
+			<li><a href="1/"></a></li>
+		</ul>
+<!--<script>-->
+<!--var elem = document.querySelector('.grid');-->
+<!--var msnry = new Masonry( elem, {-->
+<!--　//属性设置-->
+  <!--itemSelector: '.grid-item',-->
+  <!--columnWidth: 200-->
+<!--});-->
+<!--var msnry = new Masonry( '.grid', {-->
+  <!--//属性设置-->
+<!--});-->
+<!--</script>-->
+
+{% endblock %}
+<!--<script type="text/javascript">-->
+<!--function BroswerUtil() {-->
+   <!--alert(window.navigator.userAgent);-->
+<!--}-->
+<!--</script>-->
+</body>
+</html>

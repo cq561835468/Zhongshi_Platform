@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加工具</title>
+</head>
+<body>
+<form action="/background/tool_add/" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>
+        服务器保存文件夹名称(全英文不能中文)：<input name="folder">
+    </p>
+    <p>
+        工具标题：<input name="title">
+    </p>
+    <p>
+        工具内容：<textarea  name="tool_context" style="width:200px;height:80px;"></textarea>
+    </p>
+    <p>
+        开发人员：<input name="people">
+    </p>
+    <p>
+        缩略图（1张）：<input type="file" name="png_min" >
+    </p>
+    <p>
+        正文图片（多张）：<input type="file" name="png_many" multiple="">
+    </p>
+    <p>
+        工具下载附件(附件名称英文)：<input type="file" name="download1">
+    </p>
+    <p>
+        其余附件命名：<input name="download2_name">
+        其余附件(附件名称英文)：<input type="file" name="download2">
+    </p>
+    <input type="submit" value="提交"/>
+</form>
+</body>
+</html>

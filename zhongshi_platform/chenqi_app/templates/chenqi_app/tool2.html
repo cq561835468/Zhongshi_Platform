@@ -1,0 +1,42 @@
+{% extends "chenqi_app\index.html" %}
+{% load i18n %}
+{% block title %}工具{% endblock %}
+{% block index_act %}{% endblock %}
+{% block tool_act %}id="home"{% endblock %}
+{% block content %}
+{{ block.super }}
+<div class="panel-all">
+	<div class="main-tool-body">
+			<div class="search-all">
+				<div class="search-name-tool">当前搜索:{{ search_name }}</div>
+				<div class="head-search">
+					<form action="/tool/" method="POST" enctype="multipart/form-data">
+						{% csrf_token %}
+						<input class="search_input" type="text" placeholder="输入需要查询的工具" name="search">
+						<button id="search_go_all" type="submit">搜索</button>
+					</form>
+				</div>
+			</div>
+			<div class="search-list">
+				<ul style="list-style:none;padding:10px;">
+					{% for i in data %}
+					<li>
+						<a class="image" href="tool_main/{{ i.ID }}/"><img class="logo_imgs" src="{{ i.content_ico }}"></a>
+						<div class="soft-header"><a href="tool_main/{{ i.ID }}/"><h3>{{ i.tool_name }}</h3></a></div>
+						<div class="soft-summary">
+							<a class="download-link-tool" href="{{ i.download }}"><button class="btn btn-success btn-lg">下载</button></a>
+							<p title="{{ i.content_text }}">{{ i.content_text }}</p>
+							<div><span>发布日期:&nbsp&nbsp{{ i.Time }}</span>&nbsp&nbsp&nbsp<span>开发者:&nbsp&nbsp{{ i.content_people }}</span></div>
+						</div>
+					</li>
+					{% endfor %}
+				</ul>
+			</div>
+	</div>
+</div>
+
+<script>
+   $(function () { $("[data-toggle='tooltip']").tooltip(); });
+</script>
+{% endblock %}
+

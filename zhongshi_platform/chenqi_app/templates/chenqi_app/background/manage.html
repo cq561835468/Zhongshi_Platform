@@ -1,0 +1,269 @@
+{% extends "chenqi_app\index.html" %}
+{% load i18n %}
+{% block title %}中试项目管理{% endblock %}
+{% block index_act %}{% endblock %}
+{% block tool_act %}{% endblock %}
+{% block manage_act %}id="home"{% endblock %}
+{% block content %}
+{{ block.super }}
+<div class="panel_pro_main">
+    <div class="search_pro_main">
+        <div class="search-pro-name">当前搜索: {{ search_name }}</div>
+            <div class="search-head-search">
+                {% if Pro_list %} <form action="{% url 'download_list' Pro_list %}" method="POST" enctype="multipart/form-data">{% endif %}
+                    {% csrf_token %}
+                    <button class="btn btn-success" id="Download">下载</button>
+                </form>
+                <form action="/project_main/" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <button class="btn-search" type="submit">搜索</button>
+
+                    <input id="search_input" class="search-pro-input" type="text" placeholder="输入查询" name="search" >
+                    <div id="time_hidden" hidden="hidden" >
+                    </div>
+                    <select id = select_all class="form-control" name="select_form" onchange="change()">
+                        <option>状态</option>
+                        <option>项目名称</option>
+                        <option>负责人</option>
+                        <option>结项时间</option>
+                        <option>版本数</option>
+                    </select>
+                </form>
+            </div>
+    </div>
+</div>
+
+<div class="pro">
+    <table id="tableSort" class="pro_main">
+        <thead>
+        <tr>
+            <!--<th class="pro_la" rowspan="2">项目组</th>-->
+            <th class="pro_sm" rowspan="2" >序号</th>
+            <th class="pro_la" rowspan="2">状态</th>
+            <!--<th class="pro_sm" rowspan="2">项目类型</th>-->
+            <th class="pro_name" rowspan="2">项目名称<span class="arrow dsc"></span></th>
+            <th class="pro_bug">致命</th>
+            <th class="pro_bug">严重</th>
+            <th class="pro_bug">普通</th>
+            <th class="pro_bug">较低</th>
+            <th class="pro_bug">建议</th>
+            <th class="pro_bug">总计</th>
+            <th class="pro_la" rowspan="2">负责人</th>
+            <!--<th class="pro_la" rowspan="2">项目参与人</th>-->
+            <th class="pro_time" rowspan="2">创建时间<span class="arrow dsc"></span></th>
+            <th class="pro_time" rowspan="2">结项时间<span class="arrow dsc"></span></th>
+            <th class="pro_sm" rowspan="2">工时总计</th>
+            <th class="pro_sm" rowspan="2">版本数<span class="arrow dsc"></span></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in data %}
+        <tr class="hover">
+            <td class="separator" >{{ i.Pro_numbers }}</td>
+            {% if i.Pro_state == '已结项'%}
+            <td id="bug_table_green" class="bug_table_green" >{{ i.Pro_state }}</td>
+            {% else %}
+            <td id="bug_table_red" class="bug_table_red" >{{ i.Pro_state }}</td>
+            {% endif %}
+            <td class="bug_table" ><a class="name_link" href="{{ i.Pro_numbers }}/" target="_blank">{{ i.Pro_name }}</a></td>
+            <td class="bug_table">{{ i.Pro_Fatal_Bug }}</td>
+            <td class="bug_table">{{ i.Pro_Serious_Bug }}</td>
+            <td class="bug_table">{{ i.Pro_Common_Bug }}</td>
+            <td class="bug_table">{{ i.Pro_Lower_Bug }}</td>
+            <td class="bug_table">{{ i.Pro_Suggest_Bug }}</td>
+            <td class="bug_table">{{ i.Pro_All_Bug }}</td>
+            <td class="people_table">{{ i.Pro_People_pr }}</td>
+            <td class="time_table">{{ i.Time_begin }}</td>
+            <td class="time_table">{{ i.Time_end }}</td>
+            <td class="time_table">{{ i.timeall }}</td>
+            <td class="time_table">{{ i.vernum }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+<script type="text/javascript">
+        $(document).ready(function(){
+            var tableObject = $('#tableSort');//获取id为tableSort的table对象
+            var tbHead = tableObject.children('thead');//获取table对象下的thead
+            var tbHeadTh = tbHead.find('tr th span');//获取thead下的tr下的th
+            var tbBody = tableObject.children('tbody');//获取table对象下的tbody
+            var tbBodyTr = tbBody.find('tr');//获取tbody下的tr
+            var sortIndex = -1; //初始化索引
+            tbHeadTh.each(function() {//遍历thead的tr下的th
+                var thisIndex = tbHeadTh.index($(this));//获取th所在的列号
+                //鼠标移除和聚焦的效果，不重要
+                $(this).mouseover(function(){ //鼠标移开事件
+                    tbBodyTr.each(function(){//编列tbody下的tr
+                        var tds = $(this).find("td");//获取列号为参数index的td对象集合
+                        $(tds[thisIndex]).addClass("hover");
+                    });
+                }).mouseout(function(){ //鼠标聚焦时间
+                    tbBodyTr.each(function(){
+                        var tds = $(this).find("td");
+                        $(tds[thisIndex]).removeClass("hover");
+                    });
+                });
+
+                $(this).click(function() {  //鼠标点击事件
+
+                    if($(this).attr("class")=="arrow asc"){
+                        $(this).attr("class","arrow dsc");
+                        var dataType = $(this).attr("type"); //获取当前点击列的 type
+                        checkColumnValue(thisIndex, dataType); //对当前点击的列进行排序 （当前索引，排序类型）
+                    }
+                    else{$(this).attr("class","arrow asc");
+                    var dataType = $(this).attr("type"); //获取当前点击列的 type
+                    checkColumnValue(thisIndex, dataType); //对当前点击的列进行排序 （当前索引，排序类型）
+                    }
+
+                });
+            });
+
+            //显示效果，不重要
+            $("tbody tr").removeClass();//先移除tbody下tr的所有css类
+            $("tbody tr").mouseover(function(){
+                $(this).addClass("hover");
+            }).mouseout(function(){
+                $(this).removeClass("hover");
+            });
+
+            //对表格排序
+            function checkColumnValue(index, type) {
+                var trsValue = new Array();  //创建一个新的列表
+                tbBodyTr.each(function() { //遍历所有的tr标签W
+                    var tds = $(this).find('td');//查找所有的 td 标签
+                    //将当前的点击列 push 到一个新的列表中
+                    //包括 当前行的 类型、当前索引的 值，和当前行的值
+                    trsValue.push(type + ".separator" + $(tds[index]).html() + ".separator" + $(this).html());
+                    $(this).html("");//清空当前列
+                });
+                var len = trsValue.length;//获取所有要拍戏的列的长度
+                if(index == sortIndex){//sortIndex =-1
+                    trsValue.reverse();//
+                } else {
+                    for(var i = 0; i < len; i++){//遍历所有的行
+                        type = trsValue[i].split(".separator")[0];// 获取要排序的类型
+                        for(var j = i + 1; j < len; j++){
+                            value1 = trsValue[i].split(".separator")[1];//当前值
+                            value2 = trsValue[j].split(".separator")[1];//当前值的下一个
+                            if(type == "number"){
+                                //js 三元运算  如果 values1 等于 '' （空） 那么，该值就为0，否则 改值为当前值
+                                value1 = value1 == "" ? 0 : value1;
+                                value2 = value2 == "" ? 0 : value2;
+                                //parseFloat() 函数可解析一个字符串，并返回一个浮点数。
+                                //该函数指定字符串中的首个字符是否是数字。如果是，则对字符串进行解析，直到到达数字的末端为止，然后以数字返回该数字，而不是作为字符串。
+                                //如果字符串的第一个字符不能被转换为数字，那么 parseFloat() 会返回 NaN。
+                                if(parseFloat(value1) > parseFloat(value2)){//如果当前值 大于 下一个值
+                                    var temp = trsValue[j];//那么就记住 大 的那个值
+                                    trsValue[j] = trsValue[i];
+                                    trsValue[i] = temp;
+                                }
+                            } else if(type == "ip"){
+                                if(ip2int(value1) > ip2int(value2)){
+                                    var temp = trsValue[j];
+                                    trsValue[j] = trsValue[i];
+                                    trsValue[i] = temp;
+                                }
+                            } else {
+                                //JavaScript localeCompare() 方法 用本地特定的顺序来比较两个字符串。
+                                //说明比较结果的数字。
+                                // 如果 stringObject 小于 target，则 localeCompare() 返回小于 0 的数。
+                                // 如果 stringObject 大于 target，则该方法返回大于 0 的数。
+                                // 如果两个字符串相等，或根据本地排序规则没有区别，该方法返回 0。
+                                if (value1.localeCompare(value2) > 0) {//该方法不兼容谷歌浏览器
+                                    var temp = trsValue[j];
+                                    trsValue[j] = trsValue[i];
+                                    trsValue[i] = temp;
+                                }
+                            }
+                        }
+                    }
+                }
+                for(var i = 0; i < len; i++){
+                    //将排序完的 值 插入到 表格中
+                    //:eq(index) 匹配一个给定索引值的元素
+                    $("tbody tr:eq(" + i + ")").html(trsValue[i].split(".separator")[2]);
+                    //console.log($("tbody tr:eq(" + i + ")").html())
+                }
+                sortIndex = index;
+            }
+            //IP转成整型 ？？？？？
+            function ip2int(ip){
+                var num = 0;
+                ip = ip.split(".");
+                //Number() 函数把对象的值转换为数字。
+                num = Number(ip[0]) * 256 * 256 * 256 + Number(ip[1]) * 256 * 256 + Number(ip[2]) * 256 + Number(ip[3]);
+                return num;
+            }
+            })
+
+    </script>
+<script>
+     function change() {
+        var th = document.getElementById("time_hidden");
+        var obj = document.getElementById("select_all"); //定位id
+        var index = obj.selectedIndex; // 选中索引
+        var arr2 = new Array("begin_time_ver","end_time_ver","time_span_ver","begin_time_manage","time_span","time_span2","end_time_manage");
+        for(var i=0;i<arr2.length;i++){
+            if(document.getElementById(arr2[i])){
+                //alert(arr2[i]);
+                th.removeChild(document.getElementById(arr2[i]));}
+                }
+        if(index == 0 || index == 1 || index == 2){
+            $("#search_input").removeAttr('hidden');
+            $("#time_hidden").attr('hidden','hidden');
+        }
+        if (index == 3){
+           $("#search_input").attr('hidden','hidden');
+           $("#time_hidden").removeAttr('hidden');
+           var obj_bt = document.createElement("input");
+           obj_bt.setAttribute("class","form-control");
+           obj_bt.setAttribute("id","end_time_manage");
+           obj_bt.setAttribute("name","end_time_manage");
+           obj_bt.setAttribute("type","date");
+           th.appendChild(obj_bt);
+
+           var text_et = document.createElement("span");
+           text_et.setAttribute("id","time_span");
+           text_et.innerHTML="结束时间";
+           th.appendChild(text_et);
+
+           var obj_et = document.createElement("input");
+           obj_et.setAttribute("class","form-control");
+           obj_et.setAttribute("id","begin_time_manage");
+           obj_et.setAttribute("name","begin_time_manage");
+           obj_et.setAttribute("type","date");
+           th.appendChild(obj_et);
+
+           var text_bt = document.createElement("span");
+           text_bt.setAttribute("id","time_span2");
+           text_bt.innerHTML="起始时间";
+           th.appendChild(text_bt);
+            }
+        if (index == 4){
+            $("#search_input").attr('hidden','hidden');
+            $("#time_hidden").removeAttr('hidden');
+            var obj_bt = document.createElement("input");
+            obj_bt.setAttribute("class","form-control");
+            obj_bt.setAttribute("id","end_time_ver");
+            obj_bt.setAttribute("name","end_time_ver");
+            obj_bt.setAttribute("type","number");
+            th.appendChild(obj_bt);
+
+            var text_et = document.createElement("span");
+            text_et.setAttribute("id","time_span_ver");
+            text_et.innerHTML="至";
+            th.appendChild(text_et);
+
+            var obj_et = document.createElement("input");
+            obj_et.setAttribute("class","form-control");
+            obj_et.setAttribute("id","begin_time_ver");
+            obj_et.setAttribute("name","begin_time_ver");
+            obj_et.setAttribute("type","number");
+            th.appendChild(obj_et);
+        }
+     }
+</script>
+{% endblock %}
